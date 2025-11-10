@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Book Review API</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 40px; }
+        .container { max-width: 600px; }
+        .form-group { margin-bottom: 15px; }
+        label { display: block; margin-bottom: 5px; font-weight: bold; }
+        input[type="text"], input[type="password"] { 
+            width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px; 
+        }
+        button { 
+            background-color: #007cba; color: white; padding: 10px 20px; 
+            border: none; border-radius: 4px; cursor: pointer; 
+        }
+        button:hover { background-color: #005a87; }
+        .result { 
+            margin-top: 20px; padding: 10px; border-radius: 4px; 
+            background-color: #f5f5f5; border-left: 4px solid #007cba; 
+        }
+        .error { border-left-color: #dc3545; background-color: #f8d7da; }
+        .success { border-left-color: #28a745; background-color: #d4edda; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Book Review API Test</h1>
+        
+        <h2>Task 6: User Registration</h2>
+        <form id="registerForm">
+            <div class="form-group">
+                <label for="username">Username:</label>
+                <input type="text" id="username" name="username" required>
+            </div>
+            <div class="form-group">
+                <label for="password">Password:</label>
+                <input type="password" id="password" name="password" required>
+            </div>
+            <button type="submit">Register User</button>
+        </form>
+        
+        <div id="result" class="result" style="display: none;"></div>
+
+        <h2>Quick API Tests</h2>
+        <p><a href="/" target="_blank">Task 1: Get All Books</a></p>
+        <p><a href="/isbn/1" target="_blank">Task 2: Get Book by ISBN (1)</a></p>
+        <p><a href="/author/Unknown" target="_blank">Task 3: Get Books by Author (Unknown)</a></p>
+        <p><a href="/title/Pride and Prejudice" target="_blank">Task 4: Get Books by Title</a></p>
+        <p><a href="/review/1" target="_blank">Task 5: Get Book Reviews (ISBN 1)</a></p>
+    </div>
+
+    <script>
+        document.getElementById('registerForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const username = document.getElementById('username').value;
+            const password = document.getElementById('password').value;
+            const resultDiv = document.getElementById('result');
+            
+            try {
+                const response = await fetch('/register', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ username, password })
+                });
+                
+                const data = await response.json();
+                
+                resultDiv.style.display = 'block';
+                resultDiv.className = 'result ' + (response.ok ? 'success' : 'error');
+                resultDiv.innerHTML = `<strong>Response (${response.status}):</strong><br>${JSON.stringify(data, null, 2)}`;
+                
+            } catch (error) {
+                resultDiv.style.display = 'block';
+                resultDiv.className = 'result error';
+                resultDiv.innerHTML = `<strong>Error:</strong><br>${error.message}`;
+            }
+        });
+    </script>
+</body>
+</html>
