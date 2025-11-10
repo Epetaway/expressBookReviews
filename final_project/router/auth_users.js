@@ -66,7 +66,7 @@ regd_users.post("/login", (req,res) => {
 regd_users.put("/auth/review/:isbn", (req, res) => {
   const isbn = req.params.isbn;
   const review = req.query.review || req.body.review;
-  const username = req.session.authorization.username;
+  const username = req.username || req.session.authorization.username;
   
   // Check if review is provided
   if (!review) {
@@ -87,7 +87,7 @@ regd_users.put("/auth/review/:isbn", (req, res) => {
 // Delete a book review
 regd_users.delete("/auth/review/:isbn", (req, res) => {
   const isbn = req.params.isbn;
-  const username = req.session.authorization.username;
+  const username = req.username || req.session.authorization.username;
   
   // Check if the book exists
   if (!books[isbn]) {
@@ -103,6 +103,21 @@ regd_users.delete("/auth/review/:isbn", (req, res) => {
   delete books[isbn].reviews[username];
   
   return res.status(200).json({ message: `Review for book with ISBN ${isbn} deleted successfully` });
+});
+
+// Logout endpoint to clear session
+regd_users.post("/logout", (req, res) => {
+  if (req.session.authorization) {
+    req.session.destroy((err) => {
+      if (err) {
+        return res.status(500).json({ message: "Could not log out" });
+      }
+      res.clearCookie('connect.sid'); // Clear session cookie
+      return res.status(200).json({ message: "Logged out successfully" });
+    });
+  } else {
+    return res.status(200).json({ message: "No active session" });
+  }
 });
 
 module.exports.authenticated = regd_users;
