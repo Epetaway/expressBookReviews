@@ -19,11 +19,11 @@ const isValid = (username)=>{ //returns boolean
 }
 
 const authenticatedUser = (username,password)=>{ //returns boolean
-  //Filter users array to find matching username and password
+  //Filter the users array for any user with the same username and password
   let validusers = users.filter((user)=>{
     return (user.username === username && user.password === password)
   });
-  //Return true if valid user found, false otherwise
+  //Return true if any valid user is found, otherwise false
   if(validusers.length > 0){
     return true;
   } else {
@@ -38,23 +38,23 @@ regd_users.post("/login", (req,res) => {
 
   // Check if username and password are provided
   if (!username || !password) {
-      return res.status(404).json({message: "Error logging in"});
+    return res.status(404).json({ message: "Error logging in" });
   }
 
-  // Authenticate user
-  if (authenticatedUser(username,password)) {
-      // Generate JWT access token
-      let accessToken = jwt.sign({
-          data: password
-      }, 'access', { expiresIn: 60 * 60 });
+  // Authenticate the user
+  if (authenticatedUser(username, password)) {
+    // Generate JWT access token
+    let accessToken = jwt.sign({
+      data: password
+    }, 'access', { expiresIn: 60 * 60 });
 
-      // Store access token and username in session
-      req.session.authorization = {
-          accessToken, username
-      }
-      return res.status(200).send("User successfully logged in");
+    // Store access token and username in session
+    req.session.authorization = {
+      accessToken, username
+    }
+    return res.status(200).send("User successfully logged in");
   } else {
-      return res.status(208).json({message: "Invalid Login. Check username and password"});
+    return res.status(208).json({ message: "Invalid Login. Check username and password" });
   }
 });
 
