@@ -9,8 +9,9 @@
         .container { max-width: 600px; }
         .form-group { margin-bottom: 15px; }
         label { display: block; margin-bottom: 5px; font-weight: bold; }
-        input[type="text"], input[type="password"] { 
+        input[type="text"], input[type="password"], textarea { 
             width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px; 
+            font-family: Arial, sans-serif; font-size: 14px;
         }
         button { 
             background-color: #007cba; color: white; padding: 10px 20px; 
@@ -42,7 +43,38 @@
             <button type="submit">Register User</button>
         </form>
         
-        <div id="result" class="result" style="display: none;"></div>
+        <div id="registerResult" class="result" style="display: none;"></div>
+
+        <h2>Task 7: User Login</h2>
+        <form id="loginForm">
+            <div class="form-group">
+                <label for="loginUsername">Username:</label>
+                <input type="text" id="loginUsername" name="loginUsername" required>
+            </div>
+            <div class="form-group">
+                <label for="loginPassword">Password:</label>
+                <input type="password" id="loginPassword" name="loginPassword" required>
+            </div>
+            <button type="submit">Login User</button>
+        </form>
+        
+        <div id="loginResult" class="result" style="display: none;"></div>
+
+        <h2>Task 8: Add/Modify Book Review (Authenticated Users Only)</h2>
+        <p><em>Note: You must login first (Task 7) before adding reviews!</em></p>
+        <form id="reviewForm">
+            <div class="form-group">
+                <label for="reviewIsbn">Book ISBN:</label>
+                <input type="text" id="reviewIsbn" name="reviewIsbn" required placeholder="e.g., 1, 2, 3...">
+            </div>
+            <div class="form-group">
+                <label for="reviewText">Review:</label>
+                <textarea id="reviewText" name="reviewText" rows="4" required placeholder="Enter your book review here..."></textarea>
+            </div>
+            <button type="submit">Add/Modify Review</button>
+        </form>
+        
+        <div id="reviewResult" class="result" style="display: none;"></div>
 
         <h2>Quick API Tests</h2>
         <p><a href="/" target="_blank">Task 1: Get All Books</a></p>
@@ -53,12 +85,13 @@
     </div>
 
     <script>
+        // Task 6: Registration Form
         document.getElementById('registerForm').addEventListener('submit', async function(e) {
             e.preventDefault();
             
             const username = document.getElementById('username').value;
             const password = document.getElementById('password').value;
-            const resultDiv = document.getElementById('result');
+            const resultDiv = document.getElementById('registerResult');
             
             try {
                 const response = await fetch('/register', {
@@ -73,7 +106,74 @@
                 
                 resultDiv.style.display = 'block';
                 resultDiv.className = 'result ' + (response.ok ? 'success' : 'error');
-                resultDiv.innerHTML = `<strong>Response (${response.status}):</strong><br>${JSON.stringify(data, null, 2)}`;
+                resultDiv.innerHTML = `<strong>Task 6 Response (${response.status}):</strong><br>${JSON.stringify(data, null, 2)}`;
+                
+            } catch (error) {
+                resultDiv.style.display = 'block';
+                resultDiv.className = 'result error';
+                resultDiv.innerHTML = `<strong>Error:</strong><br>${error.message}`;
+            }
+        });
+
+        // Task 7: Login Form
+        document.getElementById('loginForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const username = document.getElementById('loginUsername').value;
+            const password = document.getElementById('loginPassword').value;
+            const resultDiv = document.getElementById('loginResult');
+            
+            try {
+                const response = await fetch('/customer/login', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ username, password }),
+                    credentials: 'include' // Important for session cookies
+                });
+                
+                const data = await response.text(); // Login returns text, not JSON
+                
+                resultDiv.style.display = 'block';
+                resultDiv.className = 'result ' + (response.ok ? 'success' : 'error');
+                resultDiv.innerHTML = `<strong>Task 7 Response (${response.status}):</strong><br>${data}`;
+                
+            } catch (error) {
+                resultDiv.style.display = 'block';
+                resultDiv.className = 'result error';
+                resultDiv.innerHTML = `<strong>Error:</strong><br>${error.message}`;
+            }
+        });
+
+        // Task 8: Add/Modify Review Form
+        document.getElementById('reviewForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const isbn = document.getElementById('reviewIsbn').value;
+            const review = document.getElementById('reviewText').value;
+            const resultDiv = document.getElementById('reviewResult');
+            
+            try {
+                const response = await fetch(`/customer/auth/review/${isbn}`, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ review }),
+                    credentials: 'include' // Important for session cookies
+                });
+                
+                const data = await response.json();
+                
+                resultDiv.style.display = 'block';
+                resultDiv.className = 'result ' + (response.ok ? 'success' : 'error');
+                resultDiv.innerHTML = `<strong>Task 8 Response (${response.status}):</strong><br>${JSON.stringify(data, null, 2)}`;
+                
+                // Clear form on success
+                if (response.ok) {
+                    document.getElementById('reviewForm').reset();
+                }
                 
             } catch (error) {
                 resultDiv.style.display = 'block';
