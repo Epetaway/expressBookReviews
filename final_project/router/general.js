@@ -169,6 +169,44 @@ public_users.get('/async/author/:author', function (req, res) {
     });
 });
 
+// Task 13: Get book details based on title using Promise callbacks
+public_users.get('/async/title/:title', function (req, res) {
+  const title = req.params.title;
+  
+  // Function that returns a Promise for getting books by title
+  const getBooksByTitle = (bookTitle) => {
+    return new Promise((resolve, reject) => {
+      setTimeout(() => {
+        const keys = Object.keys(books);
+        const matchingBooks = {};
+        let found = false;
+        
+        keys.forEach(key => {
+          if (books[key].title.toLowerCase().includes(bookTitle.toLowerCase())) {
+            matchingBooks[key] = books[key];
+            found = true;
+          }
+        });
+        
+        if (found) {
+          resolve(matchingBooks);
+        } else {
+          reject(new Error("No books found with this title"));
+        }
+      }, 500); // 0.5 second delay to simulate async operation
+    });
+  };
+
+  // Using Promise callbacks (.then() and .catch())
+  getBooksByTitle(title)
+    .then(books => {
+      res.send(JSON.stringify(books, null, 4));
+    })
+    .catch(error => {
+      res.status(404).json({message: error.message});
+    });
+});
+
 module.exports.general = public_users;
 
 module.exports.general = public_users;
