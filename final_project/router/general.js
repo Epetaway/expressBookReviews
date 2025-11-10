@@ -85,24 +85,52 @@ public_users.get('/review/:isbn',function (req, res) {
   }
 });
 
-// Task 10: Get all books using async-await with Axios
+// Task 10: Get all books using async callback function
 public_users.get('/async', async function (req, res) {
   try {
-    // Simulate async operation using Promise
+    // Simulate async operation to get all books
     const getAllBooks = () => {
       return new Promise((resolve, reject) => {
         setTimeout(() => {
           resolve(books);
-        }, 1000); // Simulate network delay
+        }, 1000); // 1 second delay to simulate async operation
       });
     };
     
-    // Use async-await to get books
-    const allBooks = await getAllBooks();
-    res.send(JSON.stringify(allBooks, null, 4));
+    const bookList = await getAllBooks();
+    res.send(JSON.stringify(bookList, null, 4));
   } catch (error) {
-    res.status(500).json({ message: "Error fetching books", error: error.message });
+    res.status(500).json({message: "Error retrieving books"});
   }
 });
+
+// Task 11: Get book details based on ISBN using Promise callbacks
+public_users.get('/async/isbn/:isbn',function (req, res) {
+  const isbn = req.params.isbn;
+  
+  // Function that returns a Promise for getting book by ISBN
+  const getBookByISBN = (bookId) => {
+    return new Promise((resolve, reject) => {
+      setTimeout(() => {
+        if (books[bookId]) {
+          resolve(books[bookId]);
+        } else {
+          reject(new Error("Book not found"));
+        }
+      }, 500); // 0.5 second delay to simulate async operation
+    });
+  };
+
+  // Using Promise callbacks (.then() and .catch())
+  getBookByISBN(isbn)
+    .then(book => {
+      res.send(JSON.stringify(book, null, 4));
+    })
+    .catch(error => {
+      res.status(404).json({message: error.message});
+    });
+});
+
+module.exports.general = public_users;
 
 module.exports.general = public_users;
