@@ -131,6 +131,44 @@ public_users.get('/async/isbn/:isbn',function (req, res) {
     });
 });
 
+// Task 12: Get book details based on author using Promise callbacks
+public_users.get('/async/author/:author', function (req, res) {
+  const author = req.params.author;
+  
+  // Function that returns a Promise for getting books by author
+  const getBooksByAuthor = (authorName) => {
+    return new Promise((resolve, reject) => {
+      setTimeout(() => {
+        const keys = Object.keys(books);
+        const matchingBooks = {};
+        let found = false;
+        
+        keys.forEach(key => {
+          if (books[key].author.toLowerCase() === authorName.toLowerCase()) {
+            matchingBooks[key] = books[key];
+            found = true;
+          }
+        });
+        
+        if (found) {
+          resolve(matchingBooks);
+        } else {
+          reject(new Error("No books found for this author"));
+        }
+      }, 500); // 0.5 second delay to simulate async operation
+    });
+  };
+
+  // Using Promise callbacks (.then() and .catch())
+  getBooksByAuthor(author)
+    .then(books => {
+      res.send(JSON.stringify(books, null, 4));
+    })
+    .catch(error => {
+      res.status(404).json({message: error.message});
+    });
+});
+
 module.exports.general = public_users;
 
 module.exports.general = public_users;
